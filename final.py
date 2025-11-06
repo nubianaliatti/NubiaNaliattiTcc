@@ -86,7 +86,7 @@ def searchHistoricWeather(index, data_column, hour_column):
 	
          
 	
-df = pd.read_csv('com.samsung.shealth.exercise.csv', delimiter=';', skiprows=2)
+df = pd.read_csv('com.samsung.shealth.exercise.victor.csv', delimiter=';', skiprows=2)
 
 df = df[df['com.samsung.health.exercise.exercise_type'] == 1002]
 
@@ -138,7 +138,7 @@ for index, row in df_running_metrics.iterrows():
 
 
 
-df_sleep = pd.read_csv('com.samsung.shealth.sleep.csv', delimiter=';', skiprows=2)
+df_sleep = pd.read_csv('com.samsung.shealth.sleep.victor.csv', delimiter=';', skiprows=2)
 
 df_sleep_data = df_sleep[['mental_recovery','factor_01', 'factor_02', 'factor_03', 
 						  'factor_04','factor_05','factor_06', 'factor_07', 'factor_08', 
