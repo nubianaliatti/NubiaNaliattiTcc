@@ -111,8 +111,13 @@ print(df_weather_data[['start_time']].head())
 df_weather_data['start_time'] = df_weather_data['start_time'].astype(str)
 df_weather_data['dataToJoin'] = df_weather_data['start_time'].str.split(' ').str[0]
          
+<<<<<<< HEAD
     
 df = pd.read_csv('com.samsung.shealth.exercise.consolidado.csv', delimiter=';', skiprows=2,header=0,index_col=False)
+=======
+	
+df = pd.read_csv('com.samsung.shealth.exercise.victor.csv', delimiter=';', skiprows=2)
+>>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
 
 df = df[df['com.samsung.health.exercise.exercise_type'] == 1002]
 
@@ -149,9 +154,32 @@ df_running_metrics['dataToJoin'] = df_running_metrics['com.samsung.health.exerci
 
 df_sleep = pd.read_csv('com.samsung.shealth.sleep.consolidado.csv', delimiter=';', skiprows=2,header=0,index_col=False)
 
+<<<<<<< HEAD
 df_sleep_data = df_sleep[['mental_recovery', 'physical_recovery', 'movement_awakening',
                           'sleep_cycle', 'efficiency', 'sleep_score', 'sleep_duration',
                           'com.samsung.health.sleep.start_time', 'com.samsung.health.sleep.end_time']]
+=======
+
+#for i in range(0, len(df_running_metrics)):
+    #searchHistoricWeather(df_running_metrics['data'].iloc[i], df_running_metrics['hora'].iloc[i])
+
+#for i in range(0, 1):
+    #searchHistoricWeather(df_running_metrics['data'].iloc[4], df_running_metrics['hora'].iloc[4])
+
+for index, row in df_running_metrics.iterrows():
+	#if index == 87 or index == 51:
+	searchHistoricWeather(index, df_running_metrics['data'].loc[index], df_running_metrics['hora'].loc[index])
+
+
+
+df_sleep = pd.read_csv('com.samsung.shealth.sleep.victor.csv', delimiter=';', skiprows=2)
+
+df_sleep_data = df_sleep[['mental_recovery','factor_01', 'factor_02', 'factor_03', 
+						  'factor_04','factor_05','factor_06', 'factor_07', 'factor_08', 
+						  'factor_09', 'factor_10', 'physical_recovery', 'movement_awakening',
+						  'sleep_cycle', 'efficiency', 'sleep_score', 'sleep_duration',
+						  'com.samsung.health.sleep.start_time', 'com.samsung.health.sleep.end_time']]
+>>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
 
 df_sleep_data['dataToJoin'] = df_sleep_data['com.samsung.health.sleep.start_time'].str.split(' ').str[0]
 
@@ -264,4 +292,8 @@ df_final['volume_7d'] = (
 df_final.to_csv('novosDadosTeste.csv', index=False,encoding="utf-8-sig")
 
 #print("Dados salvos com sucesso no banco de dados!") 
+<<<<<<< HEAD
 print('✅ Dados salvos com sucesso no arquivo novosDadosTeste.csv!')     
+=======
+print('✅ Dados salvos com sucesso no arquivo novosDadosTeste.csv!')
+>>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
