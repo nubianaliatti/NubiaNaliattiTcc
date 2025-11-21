@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calcular Tempo de Corrida</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            background: #ffffff;
+            color: #333;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: inline-block;
+            max-width: 400px;
+            width: 100%;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #800000;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #5a0000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calcule seu tempo de corrida</h1>
+        <form id="tempoForm">
+            <input type="number" id="distancia" placeholder="Distância em km" min="0.1" step="0.1" required>
+            <button type="submit">Calcular</button>
+        </form>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        document.getElementById('tempoForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const distancia = parseFloat(document.getElementById('distancia').value);
+
+            fetch('http://127.0.0.1:5000/calcular_tempo', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ distancia: distancia })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('resultado').innerText = data.message;
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById('resultado').innerText = 'Ocorreu um erro ao calcular o tempo.';
+            });
+        });
+    </script>
+</body>
+</html>

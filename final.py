@@ -4,6 +4,7 @@ import requests_cache
 import pandas as pd
 from retry_requests import retry
 from datetime import timedelta, datetime
+import os
 
 def get_closest_hourly_row(index, hourly_dataframe, hour_column, latitude, longitude):  
     time_obj = datetime.strptime(hour_column, '%H:%M:%S')
@@ -97,27 +98,27 @@ def searchHistoricWeather(index, data_column, hour_column, latitude, longitude):
     get_closest_hourly_row(index, hourly_dataframe, hour_column, latitude, longitude)
     #print(hourly_dataframe)
 
-df_weather_data = pd.read_csv('com.samsung.shealth.exercise.weather.csv',decimal='.', delimiter=',', skiprows=1,header=0,index_col=False)
+df_weather_data = pd.read_csv('com.samsung.shealth.exercise.weather.csv',decimal='.',delimiter=',',header=0,index_col=False)
 # Remove espaços e caracteres estranhos dos nomes das colunas
 df_weather = df_weather_data.loc[:, ~df_weather_data.columns.str.contains('^Unnamed')]
 df_weather_data.columns = df_weather_data.columns.str.strip()
 print(df_weather_data.columns.tolist())
 
 
-print(df_weather_data[['start_time']].head())	
+print(df_weather_data[['start_time']].head())
 
 #df_weather_data = df_weather[['start_time', 'temperature', 'humidity']]
 
 df_weather_data['start_time'] = df_weather_data['start_time'].astype(str)
 df_weather_data['dataToJoin'] = df_weather_data['start_time'].str.split(' ').str[0]
          
-<<<<<<< HEAD
     
-df = pd.read_csv('com.samsung.shealth.exercise.consolidado.csv', delimiter=';', skiprows=2,header=0,index_col=False)
-=======
-	
-df = pd.read_csv('com.samsung.shealth.exercise.victor.csv', delimiter=';', skiprows=2)
->>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
+df = pd.read_csv('com.samsung.shealth.exercise.csv', delimiter=',',header=0,index_col=False)
+# Remove espaços e caracteres estranhos dos nomes das colunas
+df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+df.columns = df.columns.str.strip()
+
+print(df.columns.tolist())
 
 df = df[df['com.samsung.health.exercise.exercise_type'] == 1002]
 
@@ -152,34 +153,11 @@ df_running_metrics['hora'] = df_running_metrics['com.samsung.health.exercise.sta
 df_running_metrics['dataToJoin'] = df_running_metrics['com.samsung.health.exercise.start_time'].str.split(' ').str[0]
 
 
-df_sleep = pd.read_csv('com.samsung.shealth.sleep.consolidado.csv', delimiter=';', skiprows=2,header=0,index_col=False)
+df_sleep = pd.read_csv('com.samsung.shealth.sleep.csv', delimiter=',',header=0,index_col=False)
 
-<<<<<<< HEAD
 df_sleep_data = df_sleep[['mental_recovery', 'physical_recovery', 'movement_awakening',
                           'sleep_cycle', 'efficiency', 'sleep_score', 'sleep_duration',
                           'com.samsung.health.sleep.start_time', 'com.samsung.health.sleep.end_time']]
-=======
-
-#for i in range(0, len(df_running_metrics)):
-    #searchHistoricWeather(df_running_metrics['data'].iloc[i], df_running_metrics['hora'].iloc[i])
-
-#for i in range(0, 1):
-    #searchHistoricWeather(df_running_metrics['data'].iloc[4], df_running_metrics['hora'].iloc[4])
-
-for index, row in df_running_metrics.iterrows():
-	#if index == 87 or index == 51:
-	searchHistoricWeather(index, df_running_metrics['data'].loc[index], df_running_metrics['hora'].loc[index])
-
-
-
-df_sleep = pd.read_csv('com.samsung.shealth.sleep.victor.csv', delimiter=';', skiprows=2)
-
-df_sleep_data = df_sleep[['mental_recovery','factor_01', 'factor_02', 'factor_03', 
-						  'factor_04','factor_05','factor_06', 'factor_07', 'factor_08', 
-						  'factor_09', 'factor_10', 'physical_recovery', 'movement_awakening',
-						  'sleep_cycle', 'efficiency', 'sleep_score', 'sleep_duration',
-						  'com.samsung.health.sleep.start_time', 'com.samsung.health.sleep.end_time']]
->>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
 
 df_sleep_data['dataToJoin'] = df_sleep_data['com.samsung.health.sleep.start_time'].str.split(' ').str[0]
 
@@ -242,7 +220,7 @@ df_final['longitude'] = df_final['longitude'].fillna(LON_DEFAULT)
     )'''
 
 
-df_recovery = pd.read_csv('com.samsung.shealth.exercise.recovery_heart_rate.csv', delimiter=";", skiprows=2,header=0,index_col=False)
+'''df_recovery = pd.read_csv('com.samsung.shealth.exercise.recovery_heart_rate.csv', delimiter=";", skiprows=2,header=0,index_col=False)
 
 df_recovery_data = df_recovery[['start_time', 'end_time', 'heart_rate']]
 
@@ -261,7 +239,7 @@ df_recovery_data['start_time'] = df_recovery_data['start_time'].dt.floor('S')
 
 df_recovery_data = df_recovery_data[df_recovery_data['start_time'].isin(df_merged['com.samsung.health.exercise.end_time'])]
 print(df_recovery_data.head(10))
-#print(len(df_recovery_data))
+#print(len(df_recovery_data))'''
 
 for index, row in df_final.iterrows():
     #if index == 87 or index == 51:
@@ -289,11 +267,22 @@ df_final['volume_7d'] = (
     .sum()
 )
 
-df_final.to_csv('novosDadosTeste.csv', index=False,encoding="utf-8-sig")
+# Caminho do diretório do final.py
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Sobe duas pastas
+#output_dir = os.path.abspath(os.path.join(current_dir, '..'))
+
+# Caminho completo do CSV
+output_path = os.path.join(current_dir, 'novosDadosTeste.csv')
+
+# Salva o CSV
+df_final.to_csv(output_path, index=False, encoding="utf-8-sig")
+print(f"✅ Dados salvos em {output_path}")
+
+
+#df_final.to_csv('novosDadosTeste.csv', index=False,encoding="utf-8-sig")
 
 #print("Dados salvos com sucesso no banco de dados!") 
-<<<<<<< HEAD
-print('✅ Dados salvos com sucesso no arquivo novosDadosTeste.csv!')     
-=======
 print('✅ Dados salvos com sucesso no arquivo novosDadosTeste.csv!')
->>>>>>> a42b8c45ba1491c6902dbad85d0732de8d9ff634
+    

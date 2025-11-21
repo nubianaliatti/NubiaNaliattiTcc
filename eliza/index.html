@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Enviar Arquivo ZIP</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        text-align: center;
+        padding: 50px;
+      }
+      .container {
+        background: #ffffff;
+        color: #333;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        display: inline-block;
+        max-width: 400px;
+        width: 100%;
+      }
+      h1 {
+        color: #800000;
+        font-size: 22px;
+      }
+      .file-input-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+        margin: 15px 0;
+      }
+      .file-input {
+        position: absolute;
+        opacity: 0;
+        width: 100%;
+        height: 40px;
+        cursor: pointer;
+      }
+      .file-label {
+        display: block;
+        background-color: #800000;
+        color: #ffffff;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+        text-align: center;
+      }
+      .file-label:hover {
+        background-color: #5a0000;
+      }
+      #file-name {
+        margin-top: 10px;
+        font-size: 14px;
+        color: #555;
+      }
+      button {
+        background-color: #800000;
+        color: #ffffff;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background-color: #5a0000;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Exporte aqui o arquivo .zip gerado pelo Samsung Health</h1>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <div class="file-input-container">
+          <input
+            type="file"
+            name="zipFile"
+            id="zipFile"
+            class="file-input"
+            accept=".zip"
+            required
+          />
+          <label for="zipFile" class="file-label">Selecionar Arquivo</label>
+          <div id="file-name">Nenhum arquivo selecionado</div>
+        </div>
+        <button type="submit">Enviar</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("zipFile")
+        .addEventListener("change", function () {
+          const fileName =
+            this.files.length > 0
+              ? this.files[0].name
+              : "Nenhum arquivo selecionado";
+          document.getElementById("file-name").textContent = fileName;
+        });
+
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", function (event) {
+          event.preventDefault();
+          const formData = new FormData(this);
+
+          fetch("http://127.0.0.1:5000/upload", {
+            method: "POST",
+            body: formData,
+          })
+            .then((response) => {
+              if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then((data) => {
+              console.log("Sucesso:", data);
+              alert("Arquivo enviado e processado com sucesso!");
+            })
+            .catch(async (error) => {
+              console.error("Erro no fetch:", error);
+
+              // tenta ler corpo da resposta (mesmo quando é erro HTTP)
+              try {
+                const responseText = await error.response.text();
+                console.log("Resposta do servidor:", responseText);
+              } catch {}
+
+              alert("Ocorreu um erro ao enviar o arquivo (ver console).");
+            });
+        });
+    </script>
+  </body>
+</html>
