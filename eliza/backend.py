@@ -9,6 +9,8 @@ import subprocess
 import os
 import sys
 import papermill as pm
+import joblib
+import pandas as pd
 
 
 app = Flask(__name__)
@@ -120,7 +122,7 @@ def upload_file():
             pm.execute_notebook(
                 notebook_input,
                 notebook_output,
-                parameters=dict(distancia=5000)  # valor passado pelo backend
+                #parameters=dict(distancia=5000)  # valor passado pelo backend
             )
 
 
@@ -154,6 +156,79 @@ def upload_file():
         traceback.print_exc()
         print("=== FIM DO ERRO ===\n")
         return jsonify({"message": f"Erro ao processar o arquivo: {str(e)}"}), 500
+    
+# ------------------------------------------------------
+# ROTA PARA CALCULAR TEMPO RECEBENDO A DISTÂNCIA DO HTML
+# ------------------------------------------------------
+@app.route("/calcular_tempo", methods=["POST"])
+def calcular_tempo():
+
+    try:
+        data = request.get_json()
+
+        if "distancia" not in data:
+            return jsonify({"error": "Distância não enviada."}), 400
+
+        distancia_km = float(data["distancia"])
+        distancia_metros = distancia_km * 1000
+
+        # ----------------------------------------------------------
+        # Localiza o CSV dados_de_teste.csv
+        # ----------------------------------------------------------
+        csv_path = os.path.abspath('dados_de_teste.csv')
+        if not csv_path:
+            return jsonify({
+                "error": "Nenhum dados_de_teste.csv encontrado. Envie o ZIP primeiro."
+            }), 400
+
+        X_test = pd.read_csv(csv_path)
+
+        if X_test.empty:
+            return jsonify({"error": "Arquivo dados_de_teste.csv está vazio."}), 400
+
+        ultima_linha = X_test.iloc[-1].to_dict()
+
+        # ----------------------------------------------------------
+        # Carregar modelos
+        # ----------------------------------------------------------
+        model_files = {
+            "Gradient Boosting": "gradient_boosting_sem_caloria.pkl",
+            "SVR": "svr_sem_caloria.pkl",
+            "KNN": "knn_sem_caloria.pkl",
+            "Decision Tree": "decision_tree_sem_caloria.pkl",
+            "Random Forest": "random_forest_sem_caloria.pkl",
+            "Linear Regression": "linear_regression_sem_caloria.pkl"
+        }
+
+        models = {name: joblib.load(path) for name, path in model_files.items()}
+
+        # ----------------------------------------------------------
+        # Função de previsão
+        # ----------------------------------------------------------
+        def prever(model_obj, distancia):
+            dados = ultima_linha.copy()
+            dados["com.samsung.health.exercise.distance"] = distancia
+            df = pd.DataFrame([dados])
+
+            duracao_ms = model_obj.predict(df)[0]
+            total_s = int(duracao_ms / 1000)
+            return f"{total_s//60} min {total_s%60} s"
+
+        resultados = {
+            name: prever(model, distancia_metros)
+            for name, model in models.items()
+        }
+
+        return jsonify({
+            "message": "Previsão realizada!",
+            "distancia_metros": distancia_metros,
+            "resultados": resultados
+        })
+        
+
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)})
     
 
 if __name__ == '__main__':

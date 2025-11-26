@@ -123,8 +123,15 @@
             .then((data) => {
               console.log("Sucesso:", data);
               alert("Arquivo enviado e processado com sucesso!");
+            // 🔥🔥🔥 REDIRECIONAMENTO AUTOMÁTICO 🔥🔥🔥
+              window.location.href = "calcular_tempo.html";
             })
             .catch(async (error) => {
+              console.error("Erro no fetch:", error);
+              document.getElementById("file-name").textContent = this.files[0].name; // garante que apareça
+              alert("Ocorreu um erro ao enviar o arquivo.");
+            });
+            /*.catch(async (error) => {
               console.error("Erro no fetch:", error);
 
               // tenta ler corpo da resposta (mesmo quando é erro HTTP)
@@ -134,7 +141,7 @@
               } catch {}
 
               alert("Ocorreu um erro ao enviar o arquivo (ver console).");
-            });
+            });*/
         });
     </script>
   </body>

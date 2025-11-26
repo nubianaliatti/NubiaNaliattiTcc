@@ -266,6 +266,15 @@ df_final['volume_7d'] = (
     .rolling('7d', on='data')['com.samsung.health.exercise.distance_2']
     .sum()
 )
+# ============================================================
+#                    CÁLCULO DO PACE
+# ============================================================
+# Converte a duração de segundos para minutos, se necessário
+df_final['duration_min'] = df_final['com.samsung.health.exercise.duration'] / 60
+# Calcula pace em min/km
+df_final['pace'] = df_final['duration_min'] / df_final['com.samsung.health.exercise.distance']
+# Formata pace em minutos e segundos (opcional)
+df_final['pace_min_sec'] = df_final['pace'].apply(lambda x: f"{int(x)}:{int((x-int(x))*60):02d} min/km")
 
 # Caminho do diretório do final.py
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -279,7 +288,6 @@ output_path = os.path.join(current_dir, 'novosDadosTeste.csv')
 # Salva o CSV
 df_final.to_csv(output_path, index=False, encoding="utf-8-sig")
 print(f"✅ Dados salvos em {output_path}")
-
 
 #df_final.to_csv('novosDadosTeste.csv', index=False,encoding="utf-8-sig")
 

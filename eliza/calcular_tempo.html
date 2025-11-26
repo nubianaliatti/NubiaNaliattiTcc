@@ -66,7 +66,30 @@
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById('resultado').innerText = data.message;
+                const resultadoDiv = document.getElementById('resultado');
+                resultadoDiv.innerHTML = `<p class="resultado-mensagem">${data.message}</p>
+                                          <p>Distância: ${data.distancia_metros} metros</p>`;
+
+                // Criar tabela
+                const tabela = document.createElement('table');
+                const thead = document.createElement('thead');
+                thead.innerHTML = `
+                    <tr>
+                        <th>Modelo</th>
+                        <th>Tempo Previsto</th>
+                    </tr>
+                `;
+                tabela.appendChild(thead);
+
+                const tbody = document.createElement('tbody');
+                for (const [modelo, tempo] of Object.entries(data.resultados)) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td>${modelo}</td><td>${tempo}</td>`;
+                    tbody.appendChild(tr);
+                }
+                tabela.appendChild(tbody);
+
+                resultadoDiv.appendChild(tabela);
             })
             .catch(error => {
                 console.error(error);
