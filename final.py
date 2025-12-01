@@ -41,10 +41,6 @@ def get_closest_hourly_row(index, hourly_dataframe, hour_column, latitude, longi
             df_final.loc[index, 'wind_speed_x'] = wind_val
         else:
            df_final.loc[index, 'wind_speed_x'] = df_final.loc[index, 'wind_speed'] 
-    
-    '''df_final['temperature'].loc[index] = filtered_row['temperature_2m'].values[0]
-    df_final['humidity'].loc[index] = filtered_row['relative_humidity_2m']
-    df_final['wind_speed_x'].loc[index] = filtered_row['wind_speed_10m']'''
 
 def searchHistoricWeather(index, data_column, hour_column, latitude, longitude):
     # Setup the Open-Meteo API client with cache and retry on error

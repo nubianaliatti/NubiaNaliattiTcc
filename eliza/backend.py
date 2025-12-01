@@ -31,9 +31,13 @@ os.makedirs(EXTRACT_FOLDER, exist_ok=True)
 # Regex para arquivos Samsung Health com timestamp (14 dígitos)
 file_patterns = [
     r"com\.samsung\.shealth\.exercise\.\d{14}",
+    #r"com\.samsung\.shealth\.exercise\.csv$",
     r"com\.samsung\.shealth\.exercise\.recovery_heart_rate\.\d{14}",
+    #r"com\.samsung\.shealth\.exercise\.recovery_heart_rate$",
     r"com\.samsung\.shealth\.sleep\.\d{14}",
-    r"com\.samsung\.shealth\.exercise\.weather\.\d{14}"
+    #r"com\.samsung\.shealth\.sleep\.csv$",
+    r"com\.samsung\.shealth\.exercise\.weather\.\d{14}",
+    #r"com\.samsung\.shealth\.exercise\.weather\.csv$"
 ]
 
 @app.route('/upload', methods=['POST'])
@@ -61,12 +65,20 @@ def upload_file():
             all_files = zip_ref.namelist()
             for file_name in all_files:
                 relative_name = os.path.basename(file_name)
+                 # verifica cada keyword
+                #for keyword, final_base_name in file_patterns.items():
+                    #if keyword in relative_name:
                 if any(re.search(pattern, relative_name) for pattern in file_patterns):
+                    # mantém extensão original
+                    ext = os.path.splitext(relative_name)[1]
                     new_name = re.sub(r"\.\d{14}", "", relative_name)  # remove timestamp
-                    final_path = os.path.join(extract_path, new_name)
+                    # nome final = padrão definido + extensão original
+                        #new_name = f"{final_base_name}{ext}"
+                    final_path = os.path.join(extract_path,new_name)
                     with zip_ref.open(file_name) as source, open(final_path, "wb") as target:
                         target.write(source.read())
                     matched_files.append(new_name)
+                        
                     
         # Aqui você pode chamar sua função de processamento
         print(estruturar_csv_samsung(extract_path))
@@ -100,21 +112,6 @@ def upload_file():
             print(f"❌ Erro inesperado: {ex}")
 
         try:
-            # Executa o notebook usando o Python do mesmo ambiente
-            '''result = subprocess.run(
-                [
-                    sys.executable,  # garante que vai usar o mesmo Python que roda o backend
-                    "-m", "nbconvert",
-                    "--to", "notebook",
-                    "--execute",
-                    notebook_path,
-                    "--output", "executed_notebook.ipynb"
-                ],
-                cwd=notebook_dir,
-                check=True,
-                capture_output=True,
-                text=True
-            )'''
 
             notebook_input = notebook_path
             notebook_output = notebook_input
@@ -125,7 +122,6 @@ def upload_file():
                 #parameters=dict(distancia=5000)  # valor passado pelo backend
             )
 
-
             print("✅ Notebook executado com sucesso!")
             print("Saída do subprocess:")
             print(result.stdout)
@@ -134,7 +130,6 @@ def upload_file():
             print("❌ Erro ao executar o notebook:")
             print(e.stdout)
             print(e.stderr)
-
 
         # Se nenhum arquivo foi encontrado, retorna aviso
         if not matched_files:
