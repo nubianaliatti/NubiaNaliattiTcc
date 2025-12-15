@@ -22,6 +22,9 @@ app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 notebook_path = os.path.abspath(os.path.join(os.getcwd(), "..", "final_20_11.ipynb"))
 notebook_dir = os.path.dirname(notebook_path)
 
+notebook_path_strava = os.path.abspath(os.path.join(os.getcwd(), "..", "strava.ipynb"))
+notebook_dir_strava = os.path.dirname(notebook_path_strava)
+
 UPLOAD_FOLDER = './eliza/uploads'
 EXTRACT_FOLDER = './eliza/extracted'
 
@@ -29,7 +32,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(EXTRACT_FOLDER, exist_ok=True)
 
 # Regex para arquivos Samsung Health com timestamp (14 dígitos)
-file_patterns = [
+file_patterns_samsung = [
     r"com\.samsung\.shealth\.exercise\.\d{14}",
     #r"com\.samsung\.shealth\.exercise\.csv$",
     r"com\.samsung\.shealth\.exercise\.recovery_heart_rate\.\d{14}",
@@ -38,6 +41,9 @@ file_patterns = [
     #r"com\.samsung\.shealth\.sleep\.csv$",
     r"com\.samsung\.shealth\.exercise\.weather\.\d{14}",
     #r"com\.samsung\.shealth\.exercise\.weather\.csv$"
+]
+file_patterns_strava = [
+    r"activities",
 ]
 
 @app.route('/upload', methods=['POST'])
@@ -68,7 +74,7 @@ def upload_file():
                  # verifica cada keyword
                 #for keyword, final_base_name in file_patterns.items():
                     #if keyword in relative_name:
-                if any(re.search(pattern, relative_name) for pattern in file_patterns):
+                if any(re.search(pattern, relative_name) for pattern in file_patterns_samsung):
                     # mantém extensão original
                     ext = os.path.splitext(relative_name)[1]
                     new_name = re.sub(r"\.\d{14}", "", relative_name)  # remove timestamp
@@ -78,13 +84,21 @@ def upload_file():
                     with zip_ref.open(file_name) as source, open(final_path, "wb") as target:
                         target.write(source.read())
                     matched_files.append(new_name)
+                elif any(re.search(pattern, relative_name) for pattern in file_patterns_strava):
+                    ext = os.path.splitext(relative_name)[1]
+                    final_path = os.path.join(extract_path,relative_name)
+                    with zip_ref.open(file_name) as source, open(final_path, "wb") as target:
+                        target.write(source.read())
+                    matched_files.append(relative_name)
                         
-                    
-        # Aqui você pode chamar sua função de processamento
-        print(estruturar_csv_samsung(extract_path))
         
-        # Caminho para o script que você quer executar
-        script_path = os.path.abspath('../final.py')  # ajuste conforme seu diretório
+         # Determinar qual script executar baseado no nome do arquivo ZIP
+        if 'samsung' in file.filename.lower():
+            script_path = os.path.abspath('../final.py')
+            # Aqui você pode chamar sua função de processamento
+            print(estruturar_csv_samsung(extract_path))
+        else:
+            script_path = os.path.abspath('../strava.py')
         # caminho da pasta onde os CSVs foram extraídos
         extracted_folder = os.path.abspath('./extracted')
         # Verifica se o arquivo existe
@@ -112,8 +126,11 @@ def upload_file():
             print(f"❌ Erro inesperado: {ex}")
 
         try:
-
-            notebook_input = notebook_path
+            
+            if 'samsung' in file.filename.lower():
+                notebook_input = notebook_path
+            else:
+                notebook_input = notebook_path_strava
             notebook_output = notebook_input
 
             pm.execute_notebook(
@@ -136,7 +153,7 @@ def upload_file():
             os.remove(zip_path)
             return jsonify({
                 "message": "Nenhum arquivo esperado foi encontrado no ZIP.",
-                "patterns": file_patterns
+                "patterns": file_patterns_samsung
             }), 200
 
         os.remove(zip_path)
@@ -187,12 +204,12 @@ def calcular_tempo():
         # Carregar modelos
         # ----------------------------------------------------------
         model_files = {
-            "Gradient Boosting": "gradient_boosting_sem_caloria.pkl",
-            "SVR": "svr_sem_caloria.pkl",
-            "KNN": "knn_sem_caloria.pkl",
-            "Decision Tree": "decision_tree_sem_caloria.pkl",
-            "Random Forest": "random_forest_sem_caloria.pkl",
-            "Linear Regression": "linear_regression_sem_caloria.pkl"
+            "Gradient Boosting3": "gradient_boosting3.pkl",
+            "SVR3": "svr3.pkl",
+            "KNN3": "knn3.pkl",
+            "Decision Tree3": "decision_tree3.pkl",
+            "Random Forest3": "random_forest3.pkl",
+            "Linear Regression3": "linear_regression3.pkl"
         }
 
         models = {name: joblib.load(path) for name, path in model_files.items()}
@@ -203,6 +220,7 @@ def calcular_tempo():
         def prever(model_obj, distancia):
             dados = ultima_linha.copy()
             dados["com.samsung.health.exercise.distance"] = distancia
+            #dados["Distance.1"] = distancia
             df = pd.DataFrame([dados])
 
             duracao_ms = model_obj.predict(df)[0]
